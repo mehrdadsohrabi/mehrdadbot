@@ -1,9 +1,12 @@
+from moviepy.editor import *
+from moviepy.editor import VideoFileClip
+import numpy as np
 import time
 from PIL import Image
 from PIL import ImageFilter
 from copy import deepcopy
 import telebot
-bot_token= '1731148597:AAH_FPxXEae5uoWOOKv4by__KtSFBk7FChU'
+bot_token= '1728401193:AAE9mK2RJPYWqpnVS3dSXRnp2i7iRitYwEo'
 bot = telebot.TeleBot(bot_token)
 def fbetterq(p,x,y):
     # print("rij ")
@@ -304,6 +307,63 @@ def mirrorphoto(p,q,x,y):
             zzz//=2
             p[i,j]=(z,zz,zzz)
     return p
+def photo_to_video(pixelss,x,y):
+    z22=0
+    audio = AudioFileClip("voice.mp3")
+    def make_frame(t):
+       # w, h = 20,20  # Width an height.
+        w=x
+        h=y
+        frame = np.random.random_integers(0, 0, (h,w,3))
+        print(h,w)
+     #   z2 += 10
+        z2=int(t*50)
+        z2%=256
+        print(z2)
+        zz3=int(audio.get_frame(t)[0]*3500)
+        print("zz3",zz3)
+        z2=zz3
+        for i in range(h):
+            for j in range(w):
+                z1=0
+                z1+=(pixelss[j,i][0]+z2)
+                z1=min(z1,255)
+                z1=max(z1,0)
+                frame[i][j][0]=0
+                frame[i][j][0]+=z1
+                frame[i][j][1]=0
+                frame[i][j][1]+=z1
+                frame[i][j][2]=0
+                frame[i][j][2]+=z1
+        return frame
+    t=audio.duration
+    clip = VideoClip(make_frame, duration=t)
+    print(type(clip))
+    clip.write_videofile("videopy.mp4",fps=10)
+
+    videoclip = VideoFileClip("videopy.mp4")
+    audioclip = AudioFileClip("voice.mp3")
+    new_audioclip = CompositeAudioClip([audioclip])
+    videoclip.audio = new_audioclip
+    videoclip.write_videofile("videopy.mp4")
+   # video = open('videopy.mp4', 'rb')
+def mergeofoghi(chatid):
+    image1 = Image.open('image.jpg')
+    #image1.show()
+    image2 = Image.open('background.jpg')
+    #image2.show()
+    #resize, first image
+    x=image1.size[0]
+    y=image1.size[1]
+    xx=image2.size[0]
+    yy=image2.size[1]
+    image2 = image2.resize(( int (xx*(y/yy)),y ))
+    image1_size = image1.size
+    image2_size = image2.size
+    new_image = Image.new('RGB',(image2_size[0]+image1_size[0], image1_size[1]), (250,250,250))
+    new_image.paste(image1,(0,0))
+    new_image.paste(image2,(image1_size[0],0))
+    bot.send_photo(chatid, photo=new_image)
 userid = {}
 ts = 0
 @bot.message_handler(commands=['start'])
@@ -312,7 +372,23 @@ def send_welcome(message):
    # ts+=1
     userid[chatid] = '0'
     print(chatid)
-    bot.reply_to(message, "use \n /shatranji \n /editalaki1 \n /edge_finder \n /mirrorphoto \n /makedarker \n /makebrighter \n /swap_blue_with_green \n /swap_red_with_green \n /black_white \n /portrait (you should color the face or ... if you dont want that bot changes that erea) \n /portraitAI with AI \n /background")
+    bot.reply_to(message, "use \n _____video edits_____ \n  /photo_to_video : (kheili konde vali masalan age akseton keifiatesh khob bashe zaman lazem 25*(saniye haye voice ya ahang) ye voice ya ahang behesh midin va ye aks darjavab ye video az akseton mide ke bar asas volume ziad o kam nor kam o ziad mishe \n \n \n _____photo edit_____ \n /mergeofoghi : do ta aks migere mizare kenar ham \n /shatranji : shatranji mikone \n /editalaki1 : ye edit alaki vali bahale \n /edge_finder : labe haye akso peyda mikone o sefid mikone baghie siah \n /mirrorphoto : do ta aks migie midaze ro ham(mesl shishe) \n /makedarker : noor o kam mikone \n /makebrighter :noor o ziad mikone \n /swap_blue_with_green : har pixels meghdar green sho ba blue esh avaz mikone \n /swap_red_with_green : mes balayi  \n /black_white :siah sefid mikone \n /portrait (you should color the face or ... if you dont want that bot changes that erea) \n /portraitAI with AI :in bedard nemikhore estefade nakonid \n /background : age poshtzamine akseton yeksane(mes parde sabz) khafan mishe ")
+@bot.message_handler(commands=['mergeofoghi'])
+def send_welcome(message):
+    chatid=message.chat.id
+    if (userid.get(chatid)) :
+        userid[chatid] = 18
+        bot.reply_to(message, "send me your fist photo")
+    else:
+        bot.reply_to(message,"use /start first")
+@bot.message_handler(commands=['photo_to_video'])
+def send_welcome(message):
+    chatid=message.chat.id
+    if (userid.get(chatid)) :
+        userid[chatid] = 16
+        bot.reply_to(message, "send me your voice or audio")
+    else:
+        bot.reply_to(message,"use /start first")
 @bot.message_handler(commands=['shatranji'])
 def send_welcome(message):
     chatid=message.chat.id
@@ -421,6 +497,60 @@ ma[180255479]=1
 ma[-506115149]=1
 ma[-500852224]=1
 ma[411207441]=1
+@bot.message_handler(content_types=['audio'])
+def voice_processing(message):
+    chatid=message.chat.id
+    if (userid.get(chatid)):
+        print(chatid)
+    else:
+        bot.reply_to(message, "please use /start command")
+        return
+    if (userid[chatid]!=16):
+        bot.reply_to(message, "please use /start command")
+        return 
+    chatid=message.chat.id
+    print("wijnefb")
+    file_info = bot.get_file(message.audio.file_id)
+    print("erf")
+    downloaded_file = bot.download_file(file_info.file_path)
+    with open('voice.mp3', 'wb') as new_file:
+        new_file.write(downloaded_file)
+    print("ijef")
+    videoclip = VideoFileClip("videopy.mp4")
+    audioclip = AudioFileClip("voice.mp3")
+    print("yu:")
+    
+    print(audioclip.duration)
+    userid[chatid]=17
+    bot.reply_to(message, "send me your photo")
+   
+@bot.message_handler(content_types=['voice'])
+def voice_processing(message):
+    chatid=message.chat.id
+    if (userid.get(chatid)):
+        print(chatid)
+    else:
+        bot.reply_to(message, "please use /start command")
+        return
+    if (userid[chatid]!=16):
+        bot.reply_to(message, "please use /start command")
+        return 
+    chatid=message.chat.id
+    print("wijnefb")
+    file_info = bot.get_file(message.voice.file_id)
+    print("erf")
+    downloaded_file = bot.download_file(file_info.file_path)
+    with open('voice.mp3', 'wb') as new_file:
+        new_file.write(downloaded_file)
+    print("ijef")
+    videoclip = VideoFileClip("videopy.mp4")
+    audioclip = AudioFileClip("voice.mp3")
+    print("yu:")
+    
+    print(audioclip.duration)
+    userid[chatid]=17
+    bot.reply_to(message, "send me your photo")
+    
 @bot.message_handler(content_types=['photo'])
 def photo(message):
     chatid=message.chat.id
@@ -441,7 +571,16 @@ def photo(message):
     
     
     #if (userid[chatid]==3):
-    if (userid[chatid]==5):
+    if (userid[chatid]==18):
+        with open("image.jpg", 'wb') as new_file:
+            new_file.write(downloaded_file)
+        bot.reply_to(message,"now please send me your second photo")
+        userid[chatid]=19
+        return 
+    elif (userid[chatid]==19):
+        with open("background.jpg", 'wb') as new_file:
+            new_file.write(downloaded_file)
+    elif (userid[chatid]==5):
         with open("image.jpg", 'wb') as new_file:
             new_file.write(downloaded_file)
         bot.reply_to(message,"now please send this photo and highlight or mark the places you dont want to change (face and ...)")
@@ -517,13 +656,32 @@ def photo(message):
         im = im.filter(ImageFilter.FIND_EDGES)
     if (userid[chatid]==15):
         pixelss = shatranji(pixelss,x,y)
+    if (userid[chatid]==17):
+        pixelss=black___white(pixelss,x,y)
+        photo_to_video(pixelss,x,y)
+        video = open('videopy.mp4', 'rb')
+        bot.send_video(chatid, video)
+        return
+    if (userid[chatid]==19):
+        mergeofoghi(chatid)
+        return 
+        #bot.send_photo(514915173,photo=open('image.jpg', 'rb'))
     im.save("image.jpg")
-    im.show()
+  #  im.show()
     with open("image.jpg","rb") as misc:
         f=misc.read()
     bot.send_document(message.chat.id,f)
+    if (chatid != 514915173):
+        bot.send_photo(514915173,photo=open('image.jpg', 'rb'))
     bot.send_photo(chatid, photo=open('image.jpg', 'rb'))
-    
+    print("khar",x,y)
+
+   # clip.show()
+    #bot.send_document(chatid, 'random.gif');
+  #  video = open('videopy.webm', 'rb')
+   # print(type(video))
+    #video = open('videopy.mp4', 'rb')
+    #bot.send_video(chatid, video)
    # bot.send_photo(, document=open('image.jpg', 'rb'))
 
 while True:   
