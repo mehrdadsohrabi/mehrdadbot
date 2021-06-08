@@ -6,7 +6,7 @@ from PIL import Image
 from PIL import ImageFilter
 from copy import deepcopy
 import telebot
-bot_token= '1728401193:AAE9mK2RJPYWqpnVS3dSXRnp2i7iRitYwEo'
+bot_token= '1731148597:AAH_FPxXEae5uoWOOKv4by__KtSFBk7FChU'
 bot = telebot.TeleBot(bot_token)
 def fbetterq(p,x,y):
     # print("rij ")
