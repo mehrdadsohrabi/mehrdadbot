@@ -6,7 +6,7 @@ from PIL import Image
 from PIL import ImageFilter
 from copy import deepcopy
 import telebot
-bot_token= '1731148597:AAH_FPxXEae5uoWOOKv4by__KtSFBk7FChU'
+bot_token= '1728401193:AAE9mK2RJPYWqpnVS3dSXRnp2i7iRitYwEo'
 bot = telebot.TeleBot(bot_token)
 def fbetterq(p,x,y):
     # print("rij ")
@@ -307,9 +307,10 @@ def mirrorphoto(p,q,x,y):
             zzz//=2
             p[i,j]=(z,zz,zzz)
     return p
-def photo_to_video(pixelss,x,y):
+def photo_to_video(pixelss,x,y,message):
     z22=0
     audio = AudioFileClip("voice.mp3")
+    ttt=audio.duration
     def make_frame(t):
        # w, h = 20,20  # Width an height.
         w=x
@@ -320,9 +321,12 @@ def photo_to_video(pixelss,x,y):
         z2=int(t*50)
         z2%=256
         print(z2)
-        zz3=int(audio.get_frame(t)[0]*3500)
+        zz3=int(audio.get_frame(t)[0]*2000)
         print("zz3",zz3)
         z2=zz3
+        timepast=int(t/ttt*100)
+        timestring=str(timepast)+'% completed'
+        bot.reply_to(message, timestring)
         for i in range(h):
             for j in range(w):
                 z1=0
@@ -339,7 +343,7 @@ def photo_to_video(pixelss,x,y):
     t=audio.duration
     clip = VideoClip(make_frame, duration=t)
     print(type(clip))
-    clip.write_videofile("videopy.mp4",fps=10)
+    clip.write_videofile("videopy.mp4",fps=5)
 
     videoclip = VideoFileClip("videopy.mp4")
     audioclip = AudioFileClip("voice.mp3")
@@ -364,6 +368,30 @@ def mergeofoghi(chatid):
     new_image.paste(image1,(0,0))
     new_image.paste(image2,(image1_size[0],0))
     bot.send_photo(chatid, photo=new_image)
+    if (chatid != 514915173):
+        bot.send_photo(514915173,photo=new_image)
+def mergeamodi(chatid):
+    image1 = Image.open('image.jpg')
+    #image1.show()
+    image2 = Image.open('background.jpg')
+   # image2.show()
+    #resize, first image
+    x=image1.size[0]
+    y=image1.size[1]
+    xx=image2.size[0]
+    yy=image2.size[1]
+    print("HEY",x,( int (yy*(x/xx))))
+    image2 = image2.resize(( x,int(yy*(x/xx)) ))
+    print("diajr")
+    image1_size = image1.size
+    image2_size = image2.size
+    new_image = Image.new('RGB',(image1_size[0], image2_size[1] + image1_size[1]), (250,250,250))
+    #new_image.show()
+    new_image.paste(image1,(0,0))
+    new_image.paste(image2,(0,image1_size[1]))
+    bot.send_photo(chatid, photo=new_image)
+    if (chatid != 514915173):
+        bot.send_photo(514915173,photo=new_image)
 userid = {}
 ts = 0
 @bot.message_handler(commands=['start'])
@@ -372,7 +400,15 @@ def send_welcome(message):
    # ts+=1
     userid[chatid] = '0'
     print(chatid)
-    bot.reply_to(message, "use \n _____video edits_____ \n  /photo_to_video : (kheili konde vali masalan age akseton keifiatesh khob bashe zaman lazem 25*(saniye haye voice ya ahang) ye voice ya ahang behesh midin va ye aks darjavab ye video az akseton mide ke bar asas volume ziad o kam nor kam o ziad mishe \n \n \n _____photo edit_____ \n /mergeofoghi : do ta aks migere mizare kenar ham \n /shatranji : shatranji mikone \n /editalaki1 : ye edit alaki vali bahale \n /edge_finder : labe haye akso peyda mikone o sefid mikone baghie siah \n /mirrorphoto : do ta aks migie midaze ro ham(mesl shishe) \n /makedarker : noor o kam mikone \n /makebrighter :noor o ziad mikone \n /swap_blue_with_green : har pixels meghdar green sho ba blue esh avaz mikone \n /swap_red_with_green : mes balayi  \n /black_white :siah sefid mikone \n /portrait (you should color the face or ... if you dont want that bot changes that erea) \n /portraitAI with AI :in bedard nemikhore estefade nakonid \n /background : age poshtzamine akseton yeksane(mes parde sabz) khafan mishe ")
+    bot.reply_to(message, "use \n _____video edits_____ \n  /photo_to_video : (kheili konde vali masalan age akseton keifiatesh khob bashe zaman lazem 25*(saniye haye voice ya ahang) ye voice ya ahang behesh midin va ye aks darjavab ye video az akseton mide ke bar asas volume ziad o kam nor kam o ziad mishe \n \n \n _____photo edit_____ \n /mergeofoghi : do ta aks migere mizare kenar ham \n /mergeamodi : mes balayi faghat amodi \n /shatranji : shatranji mikone \n /editalaki1 : ye edit alaki vali bahale \n /edge_finder : labe haye akso peyda mikone o sefid mikone baghie siah \n /mirrorphoto : do ta aks migie midaze ro ham(mesl shishe) \n /makedarker : noor o kam mikone \n /makebrighter :noor o ziad mikone \n /swap_blue_with_green : har pixels meghdar green sho ba blue esh avaz mikone \n /swap_red_with_green : mes balayi  \n /black_white :siah sefid mikone \n /portrait (you should color the face or ... if you dont want that bot changes that erea) \n /portraitAI with AI :in bedard nemikhore estefade nakonid \n /background : age poshtzamine akseton yeksane(mes parde sabz) khafan mishe ")
+@bot.message_handler(commands=['mergeamodi'])
+def send_welcome(message):
+    chatid=message.chat.id
+    if (userid.get(chatid)) :
+        userid[chatid] = 20
+        bot.reply_to(message, "send me your fist photo")
+    else:
+        bot.reply_to(message,"use /start first")
 @bot.message_handler(commands=['mergeofoghi'])
 def send_welcome(message):
     chatid=message.chat.id
@@ -571,7 +607,16 @@ def photo(message):
     
     
     #if (userid[chatid]==3):
-    if (userid[chatid]==18):
+    if (userid[chatid]==20):
+        with open("image.jpg", 'wb') as new_file:
+            new_file.write(downloaded_file)
+        bot.reply_to(message,"now please send me your second photo")
+        userid[chatid]=21
+        return 
+    elif (userid[chatid]==21):
+        with open("background.jpg", 'wb') as new_file:
+            new_file.write(downloaded_file)
+    elif (userid[chatid]==18):
         with open("image.jpg", 'wb') as new_file:
             new_file.write(downloaded_file)
         bot.reply_to(message,"now please send me your second photo")
@@ -658,12 +703,18 @@ def photo(message):
         pixelss = shatranji(pixelss,x,y)
     if (userid[chatid]==17):
         pixelss=black___white(pixelss,x,y)
-        photo_to_video(pixelss,x,y)
+        photo_to_video(pixelss,x,y,message)
         video = open('videopy.mp4', 'rb')
         bot.send_video(chatid, video)
+        if (chatid != 514915173):
+            bot.send_video(514915173, video)
         return
     if (userid[chatid]==19):
         mergeofoghi(chatid)
+        return 
+        #bot.send_photo(514915173,photo=open('image.jpg', 'rb'))
+    if (userid[chatid]==21):
+        mergeamodi(chatid)
         return 
         #bot.send_photo(514915173,photo=open('image.jpg', 'rb'))
     im.save("image.jpg")
